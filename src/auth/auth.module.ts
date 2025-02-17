@@ -7,6 +7,7 @@ import { User } from '../users/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import * as dotenv from 'dotenv';
+import { JwtStrategy } from './jwt.strategy';
 
 dotenv.config();
 
@@ -20,7 +21,7 @@ dotenv.config();
       signOptions: { expiresIn: '2h' },
     }),
   ],
-  providers: [AuthService],
+  providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
   exports: [AuthService],
 })

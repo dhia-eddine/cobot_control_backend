@@ -12,7 +12,7 @@ export class Cobot {
   ipAddress: string;
 
   @Column()
-  createdBy: string;
+  createdBy: number;
 
   @Column('jsonb')
   configuration: {

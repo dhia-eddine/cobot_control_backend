@@ -10,6 +10,7 @@ import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { User, UserRole } from '../users/user.entity';
 import { Public } from './decorators/public.decorator';
 import { AuthGuard } from './guards/auth.guard';
+import { SignInCredentialsDto } from './dto/sign-in-credentials.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -24,12 +25,11 @@ export class AuthController {
   }
 
   @Public()
-  @UseGuards(AuthGuard)
   @Post('sign-in')
   async signIn(
-    @Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto,
+    @Body(ValidationPipe) signInCredentialsDto: SignInCredentialsDto,
   ): Promise<{ access_token: string }> {
-    return this.authService.signIn(authCredentialsDto);
+    return this.authService.signIn(signInCredentialsDto);
   }
 
   @UseGuards(AuthGuard)

@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
+import { SignInCredentialsDto } from './dto/sign-in-credentials.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { User, UserRole } from '../users/user.entity';
@@ -19,9 +20,9 @@ export class AuthService {
   }
 
   async signIn(
-    authCredentialsDto: AuthCredentialsDto,
+    signInCredentialsDto: SignInCredentialsDto,
   ): Promise<{ access_token: string }> {
-    const { email, password } = authCredentialsDto;
+    const { email, password } = signInCredentialsDto;
     const user = await this.usersService.findByEmail(email);
 
     if (!user || !(await user.validatePassword(password))) {
