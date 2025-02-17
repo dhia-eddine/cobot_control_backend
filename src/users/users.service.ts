@@ -15,10 +15,11 @@ export class UsersService {
     authCredentialsDto: AuthCredentialsDto,
     role: UserRole,
   ): Promise<User> {
-    const { email, password } = authCredentialsDto;
+    const { name, email, password } = authCredentialsDto;
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = this.userRepository.create({
+      name,
       email,
       password: hashedPassword,
       role,
@@ -29,5 +30,9 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOne({ where: { email } });
+  }
+
+  async findOne(id: number): Promise<User | null> {
+    return this.userRepository.findOne({ where: { id } });
   }
 }
