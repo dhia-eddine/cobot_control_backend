@@ -14,9 +14,11 @@ export class AuthService {
 
   async signUp(
     authCredentialsDto: AuthCredentialsDto,
-    role: UserRole,
+    role?: UserRole,
   ): Promise<User> {
-    return this.usersService.createUser(authCredentialsDto, role);
+    const userRole = role ?? UserRole.OPERATOR;
+
+    return this.usersService.createUser(authCredentialsDto, userRole);
   }
 
   async signIn(

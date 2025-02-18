@@ -24,6 +24,13 @@ export class AuthController {
     return this.authService.signUp(authCredentialsDto, UserRole.ADMIN);
   }
 
+  @UseGuards(AuthGuard)
+  @Post('sign-up')
+  async SignUp(
+    @Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto,
+  ): Promise<User> {
+    return this.authService.signUp(authCredentialsDto);
+  }
   @Public()
   @Post('sign-in')
   async signIn(
