@@ -1,18 +1,40 @@
-import { IsNotEmpty, IsString, IsObject } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsArray,
+  ArrayMinSize,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+
+class ConfigurationDto {
+  @IsNotEmpty()
+  x: number;
+
+  @IsNotEmpty()
+  y: number;
+
+  @IsNotEmpty()
+  z: number;
+
+  @IsNotEmpty()
+  roll: number;
+
+  @IsNotEmpty()
+  pitch: number;
+
+  @IsNotEmpty()
+  yaw: number;
+}
 
 export class CreateTrajectoryDto {
   @IsNotEmpty()
   @IsString()
   name: string;
 
-  @IsNotEmpty()
-  @IsObject()
-  configuration: {
-    x: number;
-    y: number;
-    z: number;
-    roll: number;
-    pitch: number;
-    yaw: number;
-  };
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => ConfigurationDto)
+  configuration: ConfigurationDto[];
 }

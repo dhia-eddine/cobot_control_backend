@@ -17,7 +17,7 @@ export class Trajectory {
     roll: number;
     pitch: number;
     yaw: number;
-  };
+  }[];
 
   @ManyToOne(() => Cobot, (cobot) => cobot.trajectories, {
     onDelete: 'CASCADE',

@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Trajectory } from './trajectory.entity';
 import { CreateTrajectoryDto } from './dto/create-trajectory.dto';
 import { Cobot } from '../cobots/cobot.entity';
+import { UpdateTrajectoryDto } from './dto/update-trajectory.dto';
 
 @Injectable()
 export class TrajectoriesService {
@@ -48,10 +49,25 @@ export class TrajectoriesService {
     return trajectory;
   }
 
-  async remove(id: number): Promise<void> {
+  async updateTrajectory(
+    id: number,
+    updateTrajectoryDto: UpdateTrajectoryDto,
+  ): Promise<Trajectory> {
+    const trajectory = await this.trajectoryRepository.findOneBy({ id });
+    if (!trajectory) {
+      throw new NotFoundException(`Trajectory with ID ${id} not found`);
+    }
+
+    Object.assign(trajectory, updateTrajectoryDto);
+
+    return this.trajectoryRepository.save(trajectory);
+  }
+
+  async remove(id: number): Promise<{ message: string }> {
     const result = await this.trajectoryRepository.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Trajectory with ID ${id} not found`);
     }
+    return { message: 'Trajectory deleted successfully' };
   }
 }
