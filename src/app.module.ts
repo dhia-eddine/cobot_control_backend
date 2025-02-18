@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { CobotsModule } from './cobots/cobots.module';
+import { TrajectoriesModule } from './trajectories/trajectories.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -24,6 +25,7 @@ import { CobotsModule } from './cobots/cobots.module';
     UsersModule,
     AuthModule,
     CobotsModule,
+    TrajectoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

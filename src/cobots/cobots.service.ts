@@ -18,11 +18,15 @@ export class CobotsService {
     createdById: number,
   ): Promise<Cobot> {
     const { reference, ipAddress } = createCobotDto;
+    const createdByUser = await this.usersService.findOne(createdById);
+    if (!createdByUser) {
+      throw new Error(`User with ID ${createdById} not found`);
+    }
 
     const cobot = this.cobotRepository.create({
       reference,
       ipAddress,
-      createdBy: createdById,
+      createdBy: createdByUser.name,
       configuration: {
         x: 0,
         y: 0,

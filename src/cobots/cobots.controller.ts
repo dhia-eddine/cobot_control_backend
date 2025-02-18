@@ -26,12 +26,13 @@ export class CobotsController {
   async create(
     @Body() createCobotDto: CreateCobotDto,
     @Req() req: RequestWithUser,
-  ): Promise<void> {
+  ): Promise<{ message: string }> {
     if (!req.user) {
       throw new Error('User not found in request');
     }
     const userId = req.user.id;
     await this.cobotsService.createCobot(createCobotDto, userId);
+    return { message: 'Cobot created successfully' };
   }
 
   @Get()

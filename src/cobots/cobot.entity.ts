@@ -1,4 +1,11 @@
-import { Entity, PrimaryColumn, Column, CreateDateColumn } from 'typeorm';
+import { Trajectory } from 'src/trajectories/trajectory.entity';
+import {
+  Entity,
+  PrimaryColumn,
+  Column,
+  CreateDateColumn,
+  OneToMany,
+} from 'typeorm';
 
 @Entity()
 export class Cobot {
@@ -12,7 +19,7 @@ export class Cobot {
   ipAddress: string;
 
   @Column()
-  createdBy: number;
+  createdBy: string;
 
   @Column('jsonb')
   configuration: {
@@ -29,4 +36,7 @@ export class Cobot {
 
   @Column()
   online: boolean;
+
+  @OneToMany(() => Trajectory, (trajectory) => trajectory.cobot)
+  trajectories: Trajectory[];
 }
