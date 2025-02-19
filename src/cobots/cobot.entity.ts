@@ -1,3 +1,4 @@
+import { Kpi } from 'src/kpi/kpi.entity';
 import { Trajectory } from 'src/trajectories/trajectory.entity';
 import {
   Entity,
@@ -39,4 +40,7 @@ export class Cobot {
 
   @OneToMany(() => Trajectory, (trajectory) => trajectory.cobot)
   trajectories: Trajectory[];
+
+  @OneToMany(() => Kpi, (kpi) => kpi.cobot)
+  kpis: Kpi[];
 }
