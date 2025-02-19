@@ -33,7 +33,7 @@ export class KpisService {
 
     const quantityGlueUsed = parseFloat((Math.random() * 10).toFixed(2));
 
-    const randomSeconds = Math.floor(Math.random() * 300); // up to 5 minutes
+    const randomSeconds = Math.floor(Math.random() * 1800); // up to 30 minutes
     const sprayingTime = new Date();
     sprayingTime.setHours(0, 0, 0, 0);
     sprayingTime.setSeconds(randomSeconds);
@@ -71,16 +71,19 @@ export class KpisService {
       (sum, kpi) => sum + (kpi.endDate.getTime() - kpi.startDate.getTime()),
       0,
     );
-    const totalSprayingTime = kpis.reduce(
-      (sum, kpi) => sum + kpi.sprayingTime.getTime(),
-      0,
-    );
+    const totalSprayingTime = kpis.reduce((sum, kpi) => {
+      // Calculate the duration in milliseconds from midnight of the sprayingTime's day
+      const baseline = new Date(kpi.sprayingTime);
+      baseline.setHours(0, 0, 0, 0);
+      const sprayingDuration = kpi.sprayingTime.getTime() - baseline.getTime();
+      return sum + sprayingDuration;
+    }, 0);
 
     const averageTimePerPiece = totalOperatingTime / numberOfProducedPieces;
 
     return {
       numberOfProducedPieces,
-      totalQuantityGlue,
+      totalQuantityGlue: Number(totalQuantityGlue.toFixed(3)),
       totalOperatingTime: this.formatMillisecondsToHms(totalOperatingTime),
       totalSprayingTime: this.formatMillisecondsToHms(totalSprayingTime),
       averageTimePerPiece: this.formatMillisecondsToHms(averageTimePerPiece),
