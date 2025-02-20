@@ -29,12 +29,12 @@ export class TrajectoriesController {
     );
     return { message: 'Trajectory created successfully' };
   }
-
+  @UseGuards(AuthGuard)
   @Get()
   async findAll() {
     return this.trajectoriesService.findAll();
   }
-
+  @UseGuards(AuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: number) {
     return this.trajectoriesService.findOne(id);

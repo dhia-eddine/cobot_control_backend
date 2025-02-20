@@ -6,6 +6,9 @@ import { Cobot } from '../cobots/cobot.entity';
 
 @Injectable()
 export class KpisService {
+  private intervalsMap: Record<string, NodeJS.Timer> = {};
+  private summaryIntervalsMap: Record<string, NodeJS.Timer> = {};
+
   constructor(
     @InjectRepository(Kpi)
     private readonly kpiRepository: Repository<Kpi>,
@@ -101,5 +104,69 @@ export class KpisService {
     const ss = seconds.toString().padStart(2, '0');
 
     return `${hh}:${mm}:${ss}`;
+  }
+
+  startKpiInterval(reference: string): void {
+    // If an interval already exists for this reference, do nothing
+    if (this.intervalsMap[reference]) {
+      return;
+    }
+
+    this.intervalsMap[reference] = setInterval(async () => {
+      try {
+        await this.generateKpiForCobot(reference);
+      } catch (err) {
+        console.error(`Failed to generate KPI: ${err.message}`);
+      }
+    }, 2_000);
+  }
+
+  /**
+   * Stops an existing interval generating KPIs for a given reference.
+   * Returns true if an interval was found, otherwise false.
+   */
+  stopKpiInterval(reference: string): boolean {
+    if (this.intervalsMap[reference]) {
+      clearInterval(this.intervalsMap[reference] as NodeJS.Timeout);
+      delete this.intervalsMap[reference];
+      return true;
+    }
+    return false;
+  }
+
+  startKpiSummaryInterval(reference: string): void {
+    // If an interval already exists for this reference, do nothing.
+    if (this.summaryIntervalsMap[reference]) {
+      return;
+    }
+    this.summaryIntervalsMap[reference] = setInterval(async () => {
+      try {
+        const summary = await this.getKpiSummaryForCobotRealTime(reference);
+
+        // Here you would usually send data to a client
+        // (for example, using a WebSocket event or SSE).
+        console.log(
+          `Real-time summary for ${reference}:`,
+          JSON.stringify(summary, null, 2),
+        );
+      } catch (err) {
+        console.error(`Failed to get real-time KPI summary: ${err.message}`);
+      }
+    }, 1_000);
+  }
+
+  async getKpiSummaryForCobotRealTime(reference: string): Promise<any> {
+    // You might choose to filter for a specific time frame (e.g., last 5 minutes).
+    // For demonstration, this example reuses the same logic as getKpiSummaryForCobot.
+    return this.getKpiSummaryForCobot(reference);
+  }
+
+  stopKpiSummaryInterval(reference: string): boolean {
+    if (this.summaryIntervalsMap[reference]) {
+      clearInterval(this.summaryIntervalsMap[reference] as NodeJS.Timeout);
+      delete this.summaryIntervalsMap[reference];
+      return true;
+    }
+    return false;
   }
 }
