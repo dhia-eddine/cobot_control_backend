@@ -48,6 +48,7 @@ export class CobotsController {
   @UseGuards(AuthGuard)
   @Delete(':reference')
   async remove(@Param('reference') reference: string) {
-    return this.cobotsService.remove(reference);
+    await this.cobotsService.remove(reference);
+    return { message: 'Cobot deleted successfully' };
   }
 }

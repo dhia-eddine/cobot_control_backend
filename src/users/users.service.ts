@@ -47,4 +47,35 @@ export class UsersService {
     }
     await this.userRepository.delete(id);
   }
+
+  async update(id: number, updateUserDto: any): Promise<User> {
+    const user = await this.findOne(id);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    // Hash password if it's provided
+    if (updateUserDto.password) {
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+
+    // Update user properties
+    Object.keys(updateUserDto).forEach((key) => {
+      if (updateUserDto[key] !== undefined) {
+        user[key] = updateUserDto[key];
+      }
+    });
+
+    return this.userRepository.save(user);
+  }
+
+  async updateRole(id: number, role: UserRole): Promise<User> {
+    const user = await this.findOne(id);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    user.role = role;
+    return this.userRepository.save(user);
+  }
 }
