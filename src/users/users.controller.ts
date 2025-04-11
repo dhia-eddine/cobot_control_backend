@@ -6,6 +6,7 @@ import {
   Get,
   Param,
   Patch,
+  Post,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -22,6 +23,19 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Get(':id')
+  async findOne(@Param('id') id: string): Promise<User> {
+    const parsedId = parseInt(id, 10);
+    if (isNaN(parsedId)) {
+      throw new BadRequestException('Invalid user ID');
+    }
+    const user = await this.usersService.findOne(parsedId);
+    if (!user) {
+      throw new BadRequestException(`User with ID ${id} not found`);
+    }
+    return user;
+  }
+
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<{ message: string }> {
     const parsedId = parseInt(id, 10);
@@ -32,7 +46,7 @@ export class UsersController {
     return { message: 'User deleted successfully' };
   }
 
-  @Patch(':id')
+  @Post(':id')
   async update(
     @Param('id') id: string,
     @Body() updateUserDto: any,
@@ -44,7 +58,7 @@ export class UsersController {
     return this.usersService.update(parsedId, updateUserDto);
   }
 
-  @Patch(':id/role')
+  @Post(':id/role')
   async updateRole(
     @Param('id') id: string,
     @Body('role') role: UserRole,
