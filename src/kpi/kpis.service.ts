@@ -36,7 +36,7 @@ export class KpisService {
 
     const quantityGlueUsed = parseFloat((Math.random() * 10).toFixed(2));
 
-    const randomSeconds = Math.floor(Math.random() * 1800); // up to 30 minutes
+    const randomSeconds = Math.floor(Math.random() * 1800); // up to 30 min
     const sprayingTime = new Date();
     sprayingTime.setHours(0, 0, 0, 0);
     sprayingTime.setSeconds(randomSeconds);

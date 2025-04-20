@@ -7,6 +7,7 @@ import {
   Delete,
   UseGuards,
   Patch,
+  Req,
 } from '@nestjs/common';
 import { TrajectoriesService } from './trajectories.service';
 import { CreateTrajectoryDto } from './dto/create-trajectory.dto';
@@ -29,16 +30,20 @@ export class TrajectoriesController {
     );
     return { message: 'Trajectory created successfully' };
   }
+
+  // NEW: Get all trajectories for a specific cobot
   @UseGuards(AuthGuard)
   @Get()
-  async findAll() {
-    return this.trajectoriesService.findAll();
+  async findAll(@Param('cobotReference') cobotReference: string) {
+    return this.trajectoriesService.findAllForCobot(cobotReference);
   }
+
   @UseGuards(AuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: number) {
     return this.trajectoriesService.findOne(id);
   }
+
   @UseGuards(AuthGuard)
   @Patch(':id')
   async update(

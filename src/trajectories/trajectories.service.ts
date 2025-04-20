@@ -37,6 +37,21 @@ export class TrajectoriesService {
     return this.trajectoryRepository.save(trajectory);
   }
 
+  // NEW: Find all trajectories for a specific cobot
+  async findAllForCobot(cobotReference: string): Promise<Trajectory[]> {
+    const cobot = await this.cobotRepository.findOne({
+      where: { reference: cobotReference },
+    });
+    if (!cobot) {
+      throw new NotFoundException(
+        `Cobot with reference ${cobotReference} not found`,
+      );
+    }
+    return this.trajectoryRepository.find({
+      where: { cobot: { reference: cobotReference } },
+    });
+  }
+
   async findAll(): Promise<Trajectory[]> {
     return this.trajectoryRepository.find();
   }
