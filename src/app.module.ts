@@ -8,7 +8,6 @@ import { ConfigModule } from '@nestjs/config';
 import { CobotsModule } from './cobots/cobots.module';
 import { TrajectoriesModule } from './trajectories/trajectories.module';
 import { KpiModule } from './kpi/kpis.module';
-import { RobotTestConModule } from './robot-test-con/robot-test-con.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -29,7 +28,6 @@ import { RobotTestConModule } from './robot-test-con/robot-test-con.module';
     CobotsModule,
     TrajectoriesModule,
     KpiModule,
-    RobotTestConModule,
   ],
   controllers: [AppController],
   providers: [AppService],
