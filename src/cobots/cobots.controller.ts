@@ -16,12 +16,11 @@ import { Request } from 'express';
 interface RequestWithUser extends Request {
   user?: { id: number; email: string; role: string };
 }
-
+@UseGuards(AuthGuard)
 @Controller('cobots')
 export class CobotsController {
   constructor(private readonly cobotsService: CobotsService) {}
 
-  @UseGuards(AuthGuard)
   @Post()
   async create(
     @Body() createCobotDto: CreateCobotDto,
@@ -45,10 +44,37 @@ export class CobotsController {
     return this.cobotsService.findOne(reference);
   }
 
-  @UseGuards(AuthGuard)
   @Delete(':reference')
   async remove(@Param('reference') reference: string) {
     await this.cobotsService.remove(reference);
     return { message: 'Cobot deleted successfully' };
+  }
+
+  @Post(':reference/start')
+  async start(
+    @Param('reference') reference: string,
+  ): Promise<{ message: string }> {
+    await this.cobotsService.updateStatus(reference, 'running');
+    return {
+      message: `Cobot with reference ${reference} started successfully`,
+    };
+  }
+
+  @Post(':reference/stop')
+  async stop(
+    @Param('reference') reference: string,
+  ): Promise<{ message: string }> {
+    await this.cobotsService.updateStatus(reference, 'stopped');
+    return {
+      message: `Cobot with reference ${reference} stopped successfully`,
+    };
+  }
+
+  @Post(':reference/pause')
+  async pause(
+    @Param('reference') reference: string,
+  ): Promise<{ message: string }> {
+    await this.cobotsService.updateStatus(reference, 'paused');
+    return { message: `Cobot with reference ${reference} paused successfully` };
   }
 }

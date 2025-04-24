@@ -57,4 +57,29 @@ export class CobotsService {
   async remove(reference: string): Promise<void> {
     await this.cobotRepository.delete(reference);
   }
+
+  async resetStatuses(): Promise<void> {
+    await this.cobotRepository.update({}, { status: 'stopped' });
+  }
+
+  // Lifecycle Hook: Called when the application starts
+  async onApplicationBootstrap() {
+    await this.resetStatuses();
+    console.log('All cobots have been reset to stopped status.');
+  }
+
+  // Lifecycle Hook: Called when the application shuts down
+  async onApplicationShutdown() {
+    await this.resetStatuses();
+    console.log('All cobots have been reset to stopped status.');
+  }
+
+  async updateStatus(reference: string, status: string): Promise<void> {
+    const cobot = await this.cobotRepository.findOne({ where: { reference } });
+    if (!cobot) {
+      throw new Error(`Cobot with reference ${reference} not found`);
+    }
+    cobot.status = status;
+    await this.cobotRepository.save(cobot);
+  }
 }

@@ -54,6 +54,17 @@ export class TrajectoriesController {
   }
 
   @UseGuards(AuthGuard)
+  @Post(':trajectoryId/execute')
+  async execute(
+    @Param('trajectoryId') trajectoryId: number,
+  ): Promise<{ message: string }> {
+    // Placeholder for execution logic
+    return {
+      message: `Trajectory with ID ${trajectoryId} executed successfully`,
+    };
+  }
+
+  @UseGuards(AuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: number): Promise<{ message: string }> {
     await this.trajectoriesService.remove(id);
