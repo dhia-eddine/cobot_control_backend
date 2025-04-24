@@ -7,6 +7,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { CobotsService } from './cobots.service';
 import { CreateCobotDto } from './dto/create-cobot.dto';
@@ -16,6 +17,7 @@ import { Request } from 'express';
 interface RequestWithUser extends Request {
   user?: { id: number; email: string; role: string };
 }
+
 @UseGuards(AuthGuard)
 @Controller('cobots')
 export class CobotsController {
@@ -35,8 +37,11 @@ export class CobotsController {
   }
 
   @Get()
-  async findAll() {
-    return this.cobotsService.findAll();
+  async findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
+    // Parse page and limit from query, fallback to defaults if not provided
+    const pageNumber = page ? parseInt(page, 10) : 1;
+    const limitNumber = limit ? parseInt(limit, 10) : 10;
+    return this.cobotsService.findAll(pageNumber, limitNumber);
   }
 
   @Get(':reference')
@@ -76,5 +81,13 @@ export class CobotsController {
   ): Promise<{ message: string }> {
     await this.cobotsService.updateStatus(reference, 'paused');
     return { message: `Cobot with reference ${reference} paused successfully` };
+  }
+  @Post(':reference/ip')
+  async updateIpAddress(
+    @Param('reference') reference: string,
+    @Body('ipAddress') ipAddress: string,
+  ) {
+    await this.cobotsService.updateIpAddress(reference, ipAddress);
+    return { message: 'Cobot IP address updated successfully' };
   }
 }

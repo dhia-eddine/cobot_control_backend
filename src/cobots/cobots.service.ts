@@ -42,8 +42,34 @@ export class CobotsService {
     return this.cobotRepository.save(cobot);
   }
 
-  async findAll(): Promise<Cobot[]> {
-    return this.cobotRepository.find();
+  async findAll(
+    page = 1,
+    limit = 10,
+  ): Promise<{
+    data: Cobot[];
+    firstPage: number;
+    lastPage: number;
+    total: number;
+    page: number;
+  }> {
+    // Ensure page and limit are positive integers
+    page = Math.max(1, page);
+    limit = Math.max(1, limit);
+
+    const [data, total] = await this.cobotRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { createdAt: 'DESC' },
+    });
+
+    const lastPage = Math.max(1, Math.ceil(total / limit));
+    return {
+      data,
+      firstPage: 1,
+      lastPage,
+      total,
+      page,
+    };
   }
 
   async findOne(reference: string): Promise<Cobot> {
@@ -62,13 +88,11 @@ export class CobotsService {
     await this.cobotRepository.update({}, { status: 'stopped' });
   }
 
-  // Lifecycle Hook: Called when the application starts
   async onApplicationBootstrap() {
     await this.resetStatuses();
     console.log('All cobots have been reset to stopped status.');
   }
 
-  // Lifecycle Hook: Called when the application shuts down
   async onApplicationShutdown() {
     await this.resetStatuses();
     console.log('All cobots have been reset to stopped status.');
@@ -80,6 +104,14 @@ export class CobotsService {
       throw new Error(`Cobot with reference ${reference} not found`);
     }
     cobot.status = status;
+    await this.cobotRepository.save(cobot);
+  }
+  async updateIpAddress(reference: string, ipAddress: string): Promise<void> {
+    const cobot = await this.cobotRepository.findOne({ where: { reference } });
+    if (!cobot) {
+      throw new Error(`Cobot with reference ${reference} not found`);
+    }
+    cobot.ipAddress = ipAddress;
     await this.cobotRepository.save(cobot);
   }
 }
