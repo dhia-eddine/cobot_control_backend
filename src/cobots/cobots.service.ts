@@ -59,7 +59,6 @@ export class CobotsService {
     const [data, total] = await this.cobotRepository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
-      order: { createdAt: 'DESC' },
     });
 
     const lastPage = Math.max(1, Math.ceil(total / limit));
