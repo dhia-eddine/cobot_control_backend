@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Kpi } from './kpi.entity';
 import { Cobot } from '../cobots/cobot.entity';
+import { CreateKpiDto } from './create-kpi.dto';
 
 @Injectable()
 export class KpisService {
@@ -19,6 +20,26 @@ export class KpisService {
   /**
    * Generate a random KPI for a given Cobot and save it to the database.
    */
+  async createKpiForCobot(
+    reference: string,
+    createKpiDto: CreateKpiDto,
+  ): Promise<Kpi> {
+    const cobot = await this.cobotRepository.findOne({ where: { reference } });
+    if (!cobot) {
+      throw new Error(`Cobot with reference ${reference} not found`);
+    }
+
+    const newKpi = this.kpiRepository.create({
+      cobot,
+      cobotReference: cobot.reference,
+      startDate: createKpiDto.startDate,
+      endDate: createKpiDto.endDate,
+      sprayingTime: createKpiDto.sprayingTime || null,
+      quantityGlueUsed: createKpiDto.quantityGlueUsed || null,
+    });
+
+    return this.kpiRepository.save(newKpi);
+  }
   async generateKpiForCobot(reference: string): Promise<Kpi> {
     const cobot = await this.cobotRepository.findOne({ where: { reference } });
     if (!cobot) {
@@ -66,7 +87,7 @@ export class KpisService {
 
     const numberOfProducedPieces = kpis.length;
     const totalQuantityGlue = kpis.reduce(
-      (sum, kpi) => sum + kpi.quantityGlueUsed,
+      (sum, kpi) => sum + (kpi.quantityGlueUsed ?? 0),
       0,
     );
 
@@ -76,6 +97,7 @@ export class KpisService {
     );
     const totalSprayingTime = kpis.reduce((sum, kpi) => {
       // Calculate the duration in milliseconds from midnight of the sprayingTime's day
+      if (!kpi.sprayingTime) return sum;
       const baseline = new Date(kpi.sprayingTime);
       baseline.setHours(0, 0, 0, 0);
       const sprayingDuration = kpi.sprayingTime.getTime() - baseline.getTime();

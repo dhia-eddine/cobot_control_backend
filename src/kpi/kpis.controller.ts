@@ -1,7 +1,8 @@
-import { Controller, Post, Param, Get, UseGuards } from '@nestjs/common';
+import { Controller, Post, Param, Get, UseGuards, Body } from '@nestjs/common';
 import { KpisService } from './kpis.service';
 import { Kpi } from './kpi.entity';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { CreateKpiDto } from './create-kpi.dto';
 
 @UseGuards(AuthGuard)
 @Controller('cobots')
@@ -84,5 +85,13 @@ export class KpisController {
     return {
       message: `No active KPI summary interval found for cobot ${reference}.`,
     };
+  }
+
+  @Post(':reference/kpis')
+  async createCustomKpi(
+    @Param('reference') reference: string,
+    @Body() createKpiDto: CreateKpiDto,
+  ): Promise<Kpi> {
+    return this.kpisService.createKpiForCobot(reference, createKpiDto);
   }
 }
