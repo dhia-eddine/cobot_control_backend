@@ -18,7 +18,8 @@ export class KpisService {
   ) {}
 
   /**
-   * Generate a random KPI for a given Cobot and save it to the database.
+   * Create a KPI for a given Cobot and save it to the database.
+   * sprayingTime now is a number (duration in seconds), not a Date!
    */
   async createKpiForCobot(
     reference: string,
@@ -32,14 +33,18 @@ export class KpisService {
     const newKpi = this.kpiRepository.create({
       cobot,
       cobotReference: cobot.reference,
-      startDate: createKpiDto.startDate,
-      endDate: createKpiDto.endDate,
-      sprayingTime: createKpiDto.sprayingTime || null,
-      quantityGlueUsed: createKpiDto.quantityGlueUsed || null,
+      startDate: new Date(createKpiDto.startDate),
+      endDate: new Date(createKpiDto.endDate),
+      sprayingTime:
+        typeof createKpiDto.sprayingTime === 'number'
+          ? createKpiDto.sprayingTime
+          : null,
+      quantityGlueUsed: createKpiDto.quantityGlueUsed ?? null,
     });
 
     return this.kpiRepository.save(newKpi);
   }
+
   async generateKpiForCobot(reference: string): Promise<Kpi> {
     const cobot = await this.cobotRepository.findOne({ where: { reference } });
     if (!cobot) {
@@ -56,11 +61,10 @@ export class KpisService {
     );
 
     const quantityGlueUsed = parseFloat((Math.random() * 10).toFixed(2));
-
     const randomSeconds = Math.floor(Math.random() * 1800); // up to 30 min
-    const sprayingTime = new Date();
-    sprayingTime.setHours(0, 0, 0, 0);
-    sprayingTime.setSeconds(randomSeconds);
+
+    // sprayingTime is now a number of seconds (duration)
+    const sprayingTime = randomSeconds;
 
     const newKpi = this.kpiRepository.create({
       cobot,
@@ -96,15 +100,14 @@ export class KpisService {
       0,
     );
     const totalSprayingTime = kpis.reduce((sum, kpi) => {
-      // Calculate the duration in milliseconds from midnight of the sprayingTime's day
+      // sprayingTime is number of seconds (duration)
       if (!kpi.sprayingTime) return sum;
-      const baseline = new Date(kpi.sprayingTime);
-      baseline.setHours(0, 0, 0, 0);
-      const sprayingDuration = kpi.sprayingTime.getTime() - baseline.getTime();
-      return sum + sprayingDuration;
+      return sum + kpi.sprayingTime * 1000; // convert to ms
     }, 0);
 
-    const averageTimePerPiece = totalOperatingTime / numberOfProducedPieces;
+    const averageTimePerPiece = numberOfProducedPieces
+      ? totalOperatingTime / numberOfProducedPieces
+      : 0;
 
     return {
       numberOfProducedPieces,
@@ -129,7 +132,6 @@ export class KpisService {
   }
 
   startKpiInterval(reference: string): void {
-    // If an interval already exists for this reference, do nothing
     if (this.intervalsMap[reference]) {
       return;
     }
@@ -143,10 +145,6 @@ export class KpisService {
     }, 2_000);
   }
 
-  /**
-   * Stops an existing interval generating KPIs for a given reference.
-   * Returns true if an interval was found, otherwise false.
-   */
   stopKpiInterval(reference: string): boolean {
     if (this.intervalsMap[reference]) {
       clearInterval(this.intervalsMap[reference] as NodeJS.Timeout);
@@ -157,16 +155,12 @@ export class KpisService {
   }
 
   startKpiSummaryInterval(reference: string): void {
-    // If an interval already exists for this reference, do nothing.
     if (this.summaryIntervalsMap[reference]) {
       return;
     }
     this.summaryIntervalsMap[reference] = setInterval(async () => {
       try {
         const summary = await this.getKpiSummaryForCobotRealTime(reference);
-
-        // Here you would usually send data to a client
-        // (for example, using a WebSocket event or SSE).
         console.log(
           `Real-time summary for ${reference}:`,
           JSON.stringify(summary, null, 2),

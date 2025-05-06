@@ -24,8 +24,8 @@ export class Kpi {
   @Column({ type: 'timestamptz' })
   endDate: Date;
 
-  @Column({ type: 'timestamptz', nullable: true })
-  sprayingTime: Date | null;
+  @Column({ type: 'float', nullable: true })
+  sprayingTime: number | null;
 
   @Column('float', { nullable: true })
   quantityGlueUsed: number | null;
