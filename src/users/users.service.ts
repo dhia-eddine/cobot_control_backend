@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User, UserRole } from './user.entity';
@@ -16,6 +20,21 @@ export class UsersService {
     role: UserRole,
   ): Promise<User> {
     const { name, email, password } = authCredentialsDto;
+
+    // Email format check (server-side)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new BadRequestException('Invalid email format');
+    }
+
+    // Check if email exists
+    const existingUser = await this.userRepository.findOne({
+      where: { email },
+    });
+    if (existingUser) {
+      throw new BadRequestException('Email already exists');
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = this.userRepository.create({
@@ -59,6 +78,20 @@ export class UsersService {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
 
+    // Check email uniqueness if email is being updated
+    if (updateUserDto.email && updateUserDto.email !== user.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(updateUserDto.email)) {
+        throw new BadRequestException('Invalid email format');
+      }
+      const emailExists = await this.userRepository.findOne({
+        where: { email: updateUserDto.email },
+      });
+      if (emailExists) {
+        throw new BadRequestException('Email already exists');
+      }
+    }
+
     // Update user properties
     Object.keys(updateUserDto).forEach((key) => {
       if (updateUserDto[key] !== undefined) {
@@ -74,8 +107,13 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-
     user.role = role;
     return this.userRepository.save(user);
+  }
+
+  // For frontend AJAX email-existence check
+  async checkEmailExists(email: string): Promise<boolean> {
+    const user = await this.userRepository.findOne({ where: { email } });
+    return !!user;
   }
 }

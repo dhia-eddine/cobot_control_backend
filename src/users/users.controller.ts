@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -34,6 +35,15 @@ export class UsersController {
       throw new BadRequestException(`User with ID ${id} not found`);
     }
     return user;
+  }
+
+  @Get('check-email')
+  async checkEmail(
+    @Query('email') email: string,
+  ): Promise<{ exists: boolean }> {
+    if (!email) throw new BadRequestException('Email query param required');
+    const exists = await this.usersService.checkEmailExists(email);
+    return { exists };
   }
 
   @Delete(':id')
