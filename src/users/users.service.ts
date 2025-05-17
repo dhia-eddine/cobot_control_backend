@@ -116,4 +116,33 @@ export class UsersService {
     const user = await this.userRepository.findOne({ where: { email } });
     return !!user;
   }
+
+  async findAllPaginated(
+    page = 1,
+    limit = 10,
+  ): Promise<{
+    data: User[];
+    firstPage: number;
+    lastPage: number;
+    total: number;
+    page: number;
+  }> {
+    page = Math.max(1, page);
+    limit = Math.max(1, limit);
+
+    const [data, total] = await this.userRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { id: 'ASC' },
+    });
+
+    const lastPage = Math.max(1, Math.ceil(total / limit));
+    return {
+      data,
+      firstPage: 1,
+      lastPage,
+      total,
+      page,
+    };
+  }
 }
